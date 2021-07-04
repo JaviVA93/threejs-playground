@@ -43,10 +43,10 @@ scene.add(icosahedron);
 
 //Lights
 const ambientLight = new THREE.AmbientLight(0x404040);
-const pointLight1 = new THREE.PointLight(0x49CE28, 10);
+const pointLight1 = new THREE.PointLight(0x8928ce, 10);
 pointLight1.position.set(9, 11, 5);
-const pointLight2 = new THREE.PointLight(0xB42607, 10);
-pointLight2.position.set(-15, -15, 0);
+const pointLight2 = new THREE.PointLight(0xB42607, 20);
+pointLight2.position.set(-15, -15, 10);
 
 scene.add(ambientLight, pointLight1, pointLight2);
 

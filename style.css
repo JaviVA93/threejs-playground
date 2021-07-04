@@ -8,3 +8,15 @@ canvas {
 body {
   background: rgb(24, 24, 24);
 }
+
+.container {
+  height: 100vh;
+  display: grid;
+  place-items: center;
+}
+
+.main-title {
+  color: white;
+  font-size: 5rem;
+  z-index: 1;
+}
