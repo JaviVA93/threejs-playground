@@ -72,7 +72,7 @@ light2_gui_folder.add(pointLight2.position, 'z');
 light2_gui_folder.add(pointLight2, 'intensity');
 light2_gui_folder.addColor(pointLightsPalette, 'light2')
   .onChange(() => {
-    pointLight2.color.set(pointLightsPalette.ligth2);
+    pointLight2.color.set(pointLightsPalette.light2);
   });
 
 //Visual Helpers
