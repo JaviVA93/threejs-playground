@@ -1,56 +1,75 @@
 import './style.css'
 import * as THREE from 'three';
-import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
-import * as dat from 'dat.gui'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import * as dat from 'dat.gui';
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 
 const gui = new dat.GUI();
 
-//Loading
-const textureLoader = new THREE.TextureLoader();
-
-const normalTexture = textureLoader.load('./static/textures/leather_red_02_nor_1k.png');
-const mapTexture = textureLoader.load('./static/textures/leather_red_02_coll1_1k.png')
-
-const scene = new THREE.Scene();
+window.scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
 const renderer = new THREE.WebGLRenderer({
   canvas: document.querySelector('#bg'),
-  alpha: true
+  alpha: true,
+});
+
+
+/**
+ * Sizes for camera view size
+ */
+const sizes = {
+  width: window.innerWidth,
+  height: window.innerHeight
+}
+
+window.addEventListener('resize', () => {
+  // Update sizes
+  sizes.width = window.innerWidth
+  sizes.height = window.innerHeight
+
+  // Update camera
+  camera.aspect = sizes.width / sizes.height
+  camera.updateProjectionMatrix()
+
+  // Update renderer
+  renderer.setSize(sizes.width, sizes.height)
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 });
 
 renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setSize(window.innerWidth, window.innerHeight);
-camera.position.setZ(30);
+renderer.setSize(sizes.width, sizes.height);
+camera.position.setZ(3);
 
 renderer.render(scene, camera);
 
 
-//Main asset
-const geometry = new THREE.IcosahedronGeometry(10, 0)
-const material = new THREE.MeshStandardMaterial({
-  color: 0xFF6347,
-  roughness: 0.2,
-  metalness: 1,
-  normalMap: normalTexture,
-  map: mapTexture
-});
-const icosahedron = new THREE.Mesh(geometry, material);
+const loader = new GLTFLoader();
 
-scene.add(icosahedron);
+loader.load( 'static/textures/dice/scene.gltf', 
+  (gltf) => {
+    console.log(`gltf asset loaded`);
+    scene.add( gltf.scene );
+  },
+  (progress) => {
+    console.log(`${progress.loaded / progress.total} % loaded`);
+  },
+  (e) => {
+    console.error(e);
+  })
 
 
 //Lights
 const ambientLight = new THREE.AmbientLight(0x404040);
 const pointLight1 = new THREE.PointLight(0x8928ce, 10);
-pointLight1.position.set(9, 11, 5);
+pointLight1.position.set(5, 5, -1);
 const pointLight2 = new THREE.PointLight(0xB42607, 20);
-pointLight2.position.set(-15, -15, 10);
+pointLight2.position.set(-5, -5, 1);
 
 scene.add(ambientLight, pointLight1, pointLight2);
 
-const pointLightsPalette = { 
+const pointLightsPalette = {
   light1: 0x49CE28,
   light2: 0xB42607
 }
@@ -94,7 +113,7 @@ function animate() {
   requestAnimationFrame(animate);
 
   //Main asset movement
-  icosahedron.rotation.y += 0.01;
+  //icosahedron.rotation.y += 0.01;
 
   renderer.render(scene, camera);
 }
