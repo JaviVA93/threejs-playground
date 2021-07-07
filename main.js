@@ -2,7 +2,7 @@ import './style.css'
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import * as dat from 'dat.gui';
-import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 const gui = new dat.GUI();
 
@@ -44,28 +44,32 @@ camera.position.setZ(3);
 
 renderer.render(scene, camera);
 
-
+/**
+ * DICE MODEL LOADER
+ */
 const loader = new GLTFLoader();
-
-loader.load( 'static/textures/dice/scene.gltf', 
+let dice_model = undefined;
+loader.load('static/textures/dice/scene.gltf',
   (gltf) => {
-    console.log(`gltf asset loaded`);
-    scene.add( gltf.scene );
+    dice_model = gltf.scene.children[0];
+    dice_model.lookAt(1, 0, 0);
+    scene.add(dice_model);
   },
   (progress) => {
     console.log(`${progress.loaded / progress.total} % loaded`);
   },
   (e) => {
     console.error(e);
-  })
+  }
+);
 
 
 //Lights
 const ambientLight = new THREE.AmbientLight(0x404040);
 const pointLight1 = new THREE.PointLight(0x8928ce, 10);
-pointLight1.position.set(5, 5, -1);
+pointLight1.position.set(5, 2, 1);
 const pointLight2 = new THREE.PointLight(0xB42607, 20);
-pointLight2.position.set(-5, -5, 1);
+pointLight2.position.set(-5, -2, 1);
 
 scene.add(ambientLight, pointLight1, pointLight2);
 
@@ -94,6 +98,8 @@ light2_gui_folder.addColor(pointLightsPalette, 'light2')
     pointLight2.color.set(pointLightsPalette.light2);
   });
 
+  const dice_gui_folder = gui.addFolder('Dice');
+
 //Visual Helpers
 
 
@@ -105,8 +111,30 @@ scene.add(lightHelper1, lightHelper2, gridHelper);
 
 
 //Mouse orbit controls
-const controls = new OrbitControls(camera, renderer.domElement);
+//const controls = new OrbitControls(camera, renderer.domElement);
 
+/**
+ * Scroll behaviour
+*/
+let lastScrollTop = 0
+window.addEventListener('scroll', () => {
+  console.log('scroll detected')
+  var st = window.pageYOffset || document.documentElement.scrollTop; // Credits: "https://github.com/qeremy/so/blob/master/so.dom.js#L426"
+  if (st > lastScrollTop) {
+    // downscroll
+    if (typeof dice_model !== "undefined") {
+      dice_model.rotateY(0.1);
+      dice_model.rotateX(0.1);
+    }
+  } else {
+    // upscroll
+    if (typeof dice_model !== "undefined") {
+      dice_model.rotateY(-0.1);
+      dice_model.rotateX(-0.1);
+    }
+  }
+  lastScrollTop = st <= 0 ? 0 : st; // For Mobile or negative scrolling
+});
 
 //FRAME UPDATE SCENE
 function animate() {
@@ -114,7 +142,10 @@ function animate() {
 
   //Main asset movement
   //icosahedron.rotation.y += 0.01;
-
+  if (typeof dice_model !== "undefined") {
+    dice_model.rotateY(0.01);
+    dice_model.rotateZ(0.01);
+  }
   renderer.render(scene, camera);
 }
 
