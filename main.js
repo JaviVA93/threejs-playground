@@ -49,65 +49,22 @@ renderer.render(scene, camera);
  */
 const loader = new GLTFLoader();
 let dice_model = undefined;
-loader.load('static/textures/dice/scene.gltf',
-  (gltf) => {
-    dice_model = gltf.scene.children[0];
-    dice_model.lookAt(1, 0, 0);
-    scene.add(dice_model);
-  },
-  (progress) => {
-    console.log(`${progress.loaded / progress.total} % loaded`);
-  },
-  (e) => {
-    console.error(e);
-  }
-);
+let dice_rotation_speed = {
+  x: 0,
+  y: 0.01,
+  z: 0.01
+}
+loadDice();
 
-
-//Lights
-const ambientLight = new THREE.AmbientLight(0x404040);
-const pointLight1 = new THREE.PointLight(0x8928ce, 10);
-pointLight1.position.set(5, 2, 1);
-const pointLight2 = new THREE.PointLight(0xB42607, 20);
-pointLight2.position.set(-5, -2, 1);
-
-scene.add(ambientLight, pointLight1, pointLight2);
-
+let ambientLight, pointLight1, pointLight2;
 const pointLightsPalette = {
   light1: 0x49CE28,
   light2: 0xB42607
-}
-
-const light1_gui_folder = gui.addFolder('Light 1');
-light1_gui_folder.add(pointLight1.position, 'x');
-light1_gui_folder.add(pointLight1.position, 'y');
-light1_gui_folder.add(pointLight1.position, 'z');
-light1_gui_folder.add(pointLight1, 'intensity');
-light1_gui_folder.addColor(pointLightsPalette, 'light1')
-  .onChange(() => {
-    pointLight1.color.set(pointLightsPalette.light1);
-  });
-
-const light2_gui_folder = gui.addFolder('Light 2');
-light2_gui_folder.add(pointLight2.position, 'x');
-light2_gui_folder.add(pointLight2.position, 'y');
-light2_gui_folder.add(pointLight2.position, 'z');
-light2_gui_folder.add(pointLight2, 'intensity');
-light2_gui_folder.addColor(pointLightsPalette, 'light2')
-  .onChange(() => {
-    pointLight2.color.set(pointLightsPalette.light2);
-  });
-
-  const dice_gui_folder = gui.addFolder('Dice');
-
-//Visual Helpers
+};
+loadLights();
 
 
-const lightHelper1 = new THREE.PointLightHelper(pointLight1);
-const lightHelper2 = new THREE.PointLightHelper(pointLight2);
-const gridHelper = new THREE.GridHelper(50, 50);
-
-scene.add(lightHelper1, lightHelper2, gridHelper);
+loadDebugHelpers();
 
 
 //Mouse orbit controls
@@ -143,10 +100,76 @@ function animate() {
   //Main asset movement
   //icosahedron.rotation.y += 0.01;
   if (typeof dice_model !== "undefined") {
-    dice_model.rotateY(0.01);
-    dice_model.rotateZ(0.01);
+    dice_model.rotateY(dice_rotation_speed.y);
+    dice_model.rotateZ(dice_rotation_speed.z);
   }
   renderer.render(scene, camera);
 }
 
 animate();
+
+
+
+/**
+ * FUNCITONS
+*/
+
+function loadDice() {
+  loader.load('static/textures/dice/scene.gltf',
+    (gltf) => {
+      dice_model = gltf.scene.children[0];
+      dice_model.lookAt(1, 0, 0);
+      scene.add(dice_model);
+    },
+    (progress) => {
+      console.log(`${progress.loaded / progress.total} % loaded`);
+    },
+    (e) => {
+      console.error(e);
+    }
+  );
+}
+
+
+function loadLights() {
+  ambientLight = new THREE.AmbientLight(0x404040);
+  pointLight1 = new THREE.PointLight(0x8928ce, 10);
+  pointLight1.position.set(5, 2, 1);
+  pointLight2 = new THREE.PointLight(0xB42607, 20);
+  pointLight2.position.set(-5, -2, 1);
+
+  scene.add(ambientLight, pointLight1, pointLight2);
+}
+
+//GUI & VISUAL HELPERS
+function loadDebugHelpers() {
+  const light1_gui_folder = gui.addFolder('Light 1');
+  light1_gui_folder.add(pointLight1.position, 'x');
+  light1_gui_folder.add(pointLight1.position, 'y');
+  light1_gui_folder.add(pointLight1.position, 'z');
+  light1_gui_folder.add(pointLight1, 'intensity');
+  light1_gui_folder.addColor(pointLightsPalette, 'light1')
+    .onChange(() => {
+      pointLight1.color.set(pointLightsPalette.light1);
+    });
+
+  const light2_gui_folder = gui.addFolder('Light 2');
+  light2_gui_folder.add(pointLight2.position, 'x');
+  light2_gui_folder.add(pointLight2.position, 'y');
+  light2_gui_folder.add(pointLight2.position, 'z');
+  light2_gui_folder.add(pointLight2, 'intensity');
+  light2_gui_folder.addColor(pointLightsPalette, 'light2')
+    .onChange(() => {
+      pointLight2.color.set(pointLightsPalette.light2);
+    });
+
+  const dice_gui_folder = gui.addFolder('Dice');
+  dice_gui_folder.add(dice_rotation_speed, 'y');
+  dice_gui_folder.add(dice_rotation_speed, 'z');
+
+  const lightHelper1 = new THREE.PointLightHelper(pointLight1);
+  const lightHelper2 = new THREE.PointLightHelper(pointLight2);
+  //const gridHelper = new THREE.GridHelper(50, 50);
+
+  scene.add(lightHelper1, lightHelper2);
+}
