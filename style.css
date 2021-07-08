@@ -7,10 +7,14 @@ canvas {
 
 body {
   background: rgb(24, 24, 24);
+  background-image: url('/galaxy.jpg');
+  background-position: center; /* Center the image */
+  background-repeat: no-repeat; /* Do not repeat the image */
+  background-size: cover; /* Resize the background image to cover the entire container */
 }
 
 .container {
-  height: 100vh;
+  height: 300vh;
   display: grid;
   justify-items: center;
 }

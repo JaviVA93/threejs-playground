@@ -5,6 +5,8 @@ import * as dat from 'dat.gui';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 const gui = new dat.GUI();
+const gltfLoader = new GLTFLoader();
+const textureLoader = new THREE.TextureLoader;
 
 window.scene = new THREE.Scene();
 
@@ -47,7 +49,6 @@ renderer.render(scene, camera);
 /**
  * DICE MODEL LOADER
  */
-const loader = new GLTFLoader();
 let dice_model = undefined;
 let dice_rotation_speed = {
   x: 0,
@@ -62,6 +63,9 @@ const pointLightsPalette = {
   light2: 0xB42607
 };
 loadLights();
+const particles_objs = loadParticles();
+scene.add(particles_objs);
+
 
 
 loadDebugHelpers();
@@ -80,20 +84,23 @@ window.addEventListener('scroll', () => {
   if (st > lastScrollTop) {
     // downscroll
     if (typeof dice_model !== "undefined") {
-      dice_model.rotateY(0.1);
-      dice_model.rotateX(0.1);
+      dice_model.rotateY(0.05);
+      dice_model.rotateX(0.05);
     }
   } else {
     // upscroll
     if (typeof dice_model !== "undefined") {
-      dice_model.rotateY(-0.1);
-      dice_model.rotateX(-0.1);
+      dice_model.rotateY(-0.05);
+      dice_model.rotateX(-0.05);
     }
   }
   lastScrollTop = st <= 0 ? 0 : st; // For Mobile or negative scrolling
 });
 
-//FRAME UPDATE SCENE
+
+///////////////////////
+//FRAME UPDATE SCENE//
+/////////////////////
 function animate() {
   requestAnimationFrame(animate);
 
@@ -115,7 +122,7 @@ animate();
 */
 
 function loadDice() {
-  loader.load('static/textures/dice/scene.gltf',
+  gltfLoader.load('static/textures/dice/scene.gltf',
     (gltf) => {
       dice_model = gltf.scene.children[0];
       dice_model.lookAt(1, 0, 0);
@@ -139,6 +146,28 @@ function loadLights() {
   pointLight2.position.set(-5, -2, 1);
 
   scene.add(ambientLight, pointLight1, pointLight2);
+}
+
+function loadParticles() {
+  const particles_geometry = new THREE.BufferGeometry;
+  const particles_cnt = 1000;
+  const posArray = new Float32Array(particles_cnt * 3);
+  const star_point = textureLoader.load('./star-point.png');
+
+  for (let i=0; i < particles_cnt * 3; i++) {
+    posArray[i] = (Math.random() - 0.5) * 5;
+  }
+
+  particles_geometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+  const particles_material = new THREE.PointsMaterial({
+    size: 0.005,
+    transparent: true
+  });
+  
+  const particles_mesh = new THREE.Points(particles_geometry, particles_material);
+  
+  return particles_mesh;
 }
 
 //GUI & VISUAL HELPERS
