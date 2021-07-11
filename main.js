@@ -52,8 +52,8 @@ renderer.render(scene, camera);
 let dice_model = undefined;
 let dice_rotation_speed = {
   x: 0,
-  y: 0.01,
-  z: 0.01
+  y: 0.1,
+  z: 0.1
 }
 loadDice();
 
@@ -84,41 +84,24 @@ window.addEventListener('scroll', () => {
   if (st > lastScrollTop) {
     // downscroll
     if (typeof dice_model !== "undefined") {
-      dice_model.rotateY(0.05);
-      dice_model.rotateX(0.05);
+      dice_model.rotateY(0.03);
+      dice_model.rotateX(0.03);
+      particles_objs.position.y += 0.01; 
     }
   } else {
     // upscroll
     if (typeof dice_model !== "undefined") {
-      dice_model.rotateY(-0.05);
-      dice_model.rotateX(-0.05);
+      dice_model.rotateY(-0.03);
+      dice_model.rotateX(-0.03);
+      particles_objs.position.y -= 0.01;
     }
   }
   lastScrollTop = st <= 0 ? 0 : st; // For Mobile or negative scrolling
 });
 
 
-///////////////////////
-//FRAME UPDATE SCENE//
-/////////////////////
-function animate() {
-  requestAnimationFrame(animate);
-
-  //Main asset movement
-  //icosahedron.rotation.y += 0.01;
-  if (typeof dice_model !== "undefined") {
-    dice_model.rotateY(dice_rotation_speed.y);
-    dice_model.rotateZ(dice_rotation_speed.z);
-  }
-  renderer.render(scene, camera);
-}
-
-animate();
-
-
-
 /**
- * FUNCITONS
+ * START FUNCITONS
 */
 
 function loadDice() {
@@ -202,3 +185,31 @@ function loadDebugHelpers() {
 
   scene.add(lightHelper1, lightHelper2);
 }
+
+
+/**
+ * END FUNCTIONS
+ */
+
+
+///////////////////////
+//FRAME UPDATE SCENE//
+/////////////////////
+const clock = new THREE.Clock();
+let elapsed_time = 0;
+function animate() {
+
+  elapsed_time = clock.getElapsedTime();
+  if (typeof dice_model !== "undefined") {
+    dice_model.rotateY(dice_rotation_speed.y * elapsed_time);
+    dice_model.rotateZ(dice_rotation_speed.z * elapsed_time);
+  }
+  particles_objs.rotateY(0.001);
+
+  renderer.render(scene, camera);
+
+  window.requestAnimationFrame(animate);
+  clock.start()
+}
+
+animate();
