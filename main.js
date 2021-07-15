@@ -3,9 +3,13 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import * as dat from 'dat.gui';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
+import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader';
 
 const gui = new dat.GUI();
 const gltfLoader = new GLTFLoader();
+const objLoader = new OBJLoader();
+const mtlLoader = new MTLLoader();
 const textureLoader = new THREE.TextureLoader;
 
 window.scene = new THREE.Scene();
@@ -42,7 +46,7 @@ window.addEventListener('resize', () => {
 
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(sizes.width, sizes.height);
-camera.position.setZ(3);
+camera.position.setZ(50);
 
 renderer.render(scene, camera);
 
@@ -55,7 +59,8 @@ let dice_rotation_speed = {
   y: 0.1,
   z: 0.1
 }
-loadDice();
+//loadDice();
+loadDesktop();
 
 let ambientLight, pointLight1, pointLight2;
 const pointLightsPalette = {
@@ -72,7 +77,7 @@ loadDebugHelpers();
 
 
 //Mouse orbit controls
-//const controls = new OrbitControls(camera, renderer.domElement);
+const controls = new OrbitControls(camera, renderer.domElement);
 
 /**
  * Scroll behaviour
@@ -86,14 +91,14 @@ window.addEventListener('scroll', () => {
     if (typeof dice_model !== "undefined") {
       dice_model.rotateY(0.03);
       dice_model.rotateX(0.03);
-      particles_objs.position.y += 0.01; 
+      particles_objs.position.y += 1;
     }
   } else {
     // upscroll
     if (typeof dice_model !== "undefined") {
       dice_model.rotateY(-0.03);
       dice_model.rotateX(-0.03);
-      particles_objs.position.y -= 0.01;
+      particles_objs.position.y -= 1;
     }
   }
   lastScrollTop = st <= 0 ? 0 : st; // For Mobile or negative scrolling
@@ -125,8 +130,8 @@ function loadLights() {
   ambientLight = new THREE.AmbientLight(0x404040);
   pointLight1 = new THREE.PointLight(0x8928ce, 10);
   pointLight1.position.set(5, 2, 1);
-  pointLight2 = new THREE.PointLight(0xB42607, 20);
-  pointLight2.position.set(-5, -2, 1);
+  pointLight2 = new THREE.PointLight(0xffffff, 1);
+  pointLight2.position.set(-14, 20, 17);
 
   scene.add(ambientLight, pointLight1, pointLight2);
 }
@@ -135,10 +140,10 @@ function loadParticles() {
   const particles_geometry = new THREE.BufferGeometry;
   const particles_cnt = 1000;
   const posArray = new Float32Array(particles_cnt * 3);
-  const star_point = textureLoader.load('./star-point.png');
+  //const star_point = textureLoader.load('./star-point.png');
 
-  for (let i=0; i < particles_cnt * 3; i++) {
-    posArray[i] = (Math.random() - 0.5) * 5;
+  for (let i = 0; i < particles_cnt * 3; i++) {
+    posArray[i] = (Math.random() - 0.5) * 55;
   }
 
   particles_geometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
@@ -147,10 +152,40 @@ function loadParticles() {
     size: 0.005,
     transparent: true
   });
-  
+
   const particles_mesh = new THREE.Points(particles_geometry, particles_material);
-  
+
   return particles_mesh;
+}
+
+let desktop;
+function loadDesktop() {
+  mtlLoader.load('static/desktop/home-office.mtl', (mat) => {
+    mat.preload();
+
+    objLoader.setMaterials(mat);
+
+    objLoader.load('static/desktop/home-office.obj',
+      function (object) {
+        object.scale.set(0.1, 0.1, 0.1)
+        scene.add(object);
+        object.position.set(0, 0, 0);
+      },
+      // called when loading is in progresses
+      function (xhr) {
+  
+        console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+  
+      },
+      // called when loading has errors
+      function (error) {
+  
+        console.log('An error happened');
+  
+      }
+    )
+    
+  })
 }
 
 //GUI & VISUAL HELPERS
